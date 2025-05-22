@@ -709,13 +709,19 @@ void vedic_optimized_multiply_batch(VedicValue *results,
                                     const VedicValue *b,
                                     size_t count)
 {
-    // Fast path for int32 * int32 batches
-    // This could be vectorized with SIMD for massive performance gains
+    if (count > INT_MAX)
+    {
+        // Fallback to serial loop if count is too large for OpenMP
+        for (size_t i = 0; i < count; i++)
+            results[i] = vedic_optimized_multiply(a[i], b[i]);
+        return;
+    }
 
+    int i;
 #ifdef _OPENMP
 #pragma omp parallel for
 #endif
-    for (size_t i = 0; i < count; i++)
+    for (i = 0; i < (int)count; i++)
     {
         results[i] = vedic_optimized_multiply(a[i], b[i]);
     }
@@ -728,10 +734,18 @@ void vedic_optimized_evaluate_batch(VedicValue *results,
                                     const char **expressions,
                                     size_t count)
 {
+    if (count > INT_MAX)
+    {
+        // Fallback to serial loop if count is too large for OpenMP
+        for (size_t i = 0; i < count; i++)
+            results[i] = vedic_optimized_evaluate(expressions[i]);
+        return;
+    }
+    int i = 0;
 #ifdef _OPENMP
 #pragma omp parallel for
 #endif
-    for (size_t i = 0; i < count; i++)
+    for (i = 0; i < count; i++)
     {
         results[i] = vedic_optimized_evaluate(expressions[i]);
     }

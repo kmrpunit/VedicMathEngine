@@ -48,7 +48,7 @@ The library automatically selects the most appropriate Vedic technique based on 
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/vedicmath.git
+   git clone https://github.com/kpunit03/vedicmath.git
    cd vedicmath
    ```
 
