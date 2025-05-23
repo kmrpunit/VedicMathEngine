@@ -58,6 +58,7 @@ set(VEDICMATH_SOURCES
     src/dynamic/vedicmath_types.c
     src/dynamic/vedicmath_dynamic.c
     src/optimized/vedicmath_optimized.c
+    src/vedic_core.c
 )
 
 # Create the library
@@ -110,6 +111,7 @@ install(FILES
     include/vedicmath_dynamic.h
     include/vedicmath_optimized.h
     include/vedicmath_platform.h
+    include/vedic_core.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
