@@ -227,6 +227,128 @@ VedicValue square_vedic_unified(VedicValue a) {
 }
 
 /**
+ * Unified division interface
+ */
+VedicValue divide_vedic_unified(VedicValue dividend, VedicValue divisor) {
+    clock_t start_time = clock();
+    VedicValue result;
+    const char* sutra_used = "Unknown";
+    VedicMode mode_used = core_config.mode;
+    
+    // Check for division by zero
+    bool is_zero_divisor = false;
+    switch (divisor.type) {
+        case VEDIC_INT32: is_zero_divisor = (divisor.value.i32 == 0); break;
+        case VEDIC_INT64: is_zero_divisor = (divisor.value.i64 == 0); break;
+        case VEDIC_FLOAT: is_zero_divisor = (divisor.value.f32 == 0.0f); break;
+        case VEDIC_DOUBLE: is_zero_divisor = (divisor.value.f64 == 0.0); break;
+        default: is_zero_divisor = true; break;
+    }
+    
+    if (is_zero_divisor) {
+        // Return infinity with appropriate sign for division by zero
+        result.type = VEDIC_DOUBLE;
+        double dividend_val = vedic_to_double(dividend);
+        result.value.f64 = (dividend_val < 0) ? -INFINITY : INFINITY;
+        sutra_used = "Error_Handling";
+        
+        clock_t end_time = clock();
+        double execution_time = ((double)(end_time - start_time)) / CLOCKS_PER_SEC * 1000.0;
+        log_operation(VEDIC_OP_DIVIDE, dividend, divisor, result, sutra_used, execution_time, mode_used);
+        return result;
+    }
+    
+    switch (core_config.mode) {
+        case VEDIC_MODE_STANDARD:
+            // Use standard division
+            result.type = vedic_result_type(dividend.type, divisor.type);
+            if (result.type == VEDIC_INT32) {
+                int32_t div = vedic_to_int32(dividend);
+                int32_t dis = vedic_to_int32(divisor);
+                result.value.i32 = div / dis;
+            } else if (result.type == VEDIC_INT64) {
+                int64_t div = vedic_to_int64(dividend);
+                int64_t dis = vedic_to_int64(divisor);
+                result.value.i64 = div / dis;
+            } else if (result.type == VEDIC_FLOAT) {
+                result.value.f32 = vedic_to_float(dividend) / vedic_to_float(divisor);
+            } else {
+                result.value.f64 = vedic_to_double(dividend) / vedic_to_double(divisor);
+            }
+            sutra_used = "Standard";
+            break;
+            
+        case VEDIC_MODE_DYNAMIC:
+            result = vedic_dynamic_divide(dividend, divisor);
+            sutra_used = "Dynamic";
+            break;
+            
+        case VEDIC_MODE_OPTIMIZED:
+            result = vedic_optimized_divide(dividend, divisor);
+            sutra_used = "Optimized";
+            break;
+            
+        case VEDIC_MODE_ADAPTIVE:
+        default:
+            // Use intelligent selection for division
+            result = select_best_division_method(dividend, divisor, &sutra_used);
+            break;
+    }
+    
+    clock_t end_time = clock();
+    double execution_time = ((double)(end_time - start_time)) / CLOCKS_PER_SEC * 1000.0;
+    
+    // Log the operation
+    log_operation(VEDIC_OP_DIVIDE, dividend, divisor, result, sutra_used, execution_time, mode_used);
+    
+    return result;
+}
+
+/**
+ * Intelligent method selection for division (add to vedic_core.c)
+ */
+static VedicValue select_best_division_method(VedicValue dividend, VedicValue divisor, const char** sutra_used) {
+    // Convert to appropriate types for pattern analysis
+    if (dividend.type <= VEDIC_INT64 && divisor.type <= VEDIC_INT64) {
+        long dividend_long = vedic_to_int64(dividend);
+        long divisor_long = vedic_to_int64(divisor);
+        
+        // Check for simple divisors (powers of 2, 5, 10)
+        if (divisor_long > 0 && (divisor_long & (divisor_long - 1)) == 0) {
+            // Power of 2 - use bit shifting equivalent
+            *sutra_used = "Binary_Division";
+            long result_long = dividend_long / divisor_long;
+            return vedic_from_int64(result_long);
+        }
+        
+        // Check for divisor near a power of 10 (good for Paravartya Yojayet)
+        long base = nearest_power_of_10(divisor_long);
+        if (is_close_to_base(divisor_long, base) && count_digits(divisor_long) <= 2) {
+            *sutra_used = "Paravartya_Yojayet";
+            long remainder;
+            long quotient = paravartya_divide(dividend_long, divisor_long, &remainder);
+            return vedic_from_int64(quotient);
+        }
+        
+        // For single digit divisors, use direct division
+        if (divisor_long < 10 && divisor_long > 0) {
+            *sutra_used = "Direct_Division";
+            long result_long = dividend_long / divisor_long;
+            return vedic_from_int64(result_long);
+        }
+        
+        // Default to standard division
+        *sutra_used = "Standard";
+        long result_long = dividend_long / divisor_long;
+        return vedic_from_int64(result_long);
+    } else {
+        // For floating point, use optimized version
+        *sutra_used = "Optimized_Float";
+        return vedic_optimized_divide(dividend, divisor);
+    }
+}
+
+/**
  * Specific sutra interfaces
  */
 VedicValue multiply_urdhva(VedicValue a, VedicValue b) {

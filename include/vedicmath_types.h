@@ -48,8 +48,10 @@
      VEDIC_OP_SUBTRACT, // Subtraction
      VEDIC_OP_MULTIPLY, // Multiplication
      VEDIC_OP_DIVIDE,   // Division
+     VEDIC_OP_SQUARE,   // Square (new operation)
      VEDIC_OP_MODULO,   // Modulo
      VEDIC_OP_POWER,    // Power
+     VEDIC_OP_SQRT,     // Square root (new operation)
      VEDIC_OP_INVALID   // Invalid operation
  } VedicOperation;
  

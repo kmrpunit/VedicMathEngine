@@ -1,0 +1,32 @@
+@PACKAGE_INIT@
+
+# VedicMath-AI Package Configuration File
+# This file is used by find_package(VedicMath) to locate the VedicMath library
+
+include(CMakeFindDependencyMacro)
+
+# Check if the required components are available
+set_and_check(VedicMath_INCLUDE_DIR "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@")
+set_and_check(VedicMath_LIB_DIR "@PACKAGE_CMAKE_INSTALL_LIBDIR@")
+
+# Import the targets
+if(NOT TARGET VedicMath::vedicmath)
+    include("${CMAKE_CURRENT_LIST_DIR}/VedicMathTargets.cmake")
+endif()
+
+# Set the library variables for compatibility
+set(VedicMath_LIBRARIES VedicMath::vedicmath)
+set(VedicMath_INCLUDE_DIRS ${VedicMath_INCLUDE_DIR})
+
+# Version information
+set(VedicMath_VERSION_MAJOR @VedicMathAI_VERSION_MAJOR@)
+set(VedicMath_VERSION_MINOR @VedicMathAI_VERSION_MINOR@)
+set(VedicMath_VERSION_PATCH @VedicMathAI_VERSION_PATCH@)
+set(VedicMath_VERSION @VedicMathAI_VERSION@)
+
+# Feature flags
+set(VedicMath_ENHANCED_DISPATCHER @BUILD_ENHANCED_DISPATCHER@)
+set(VedicMath_OPENMP_SUPPORT @USE_OPENMP@)
+set(VedicMath_DATASET_LOGGING @ENABLE_DATASET_LOGGING@)
+
+check_required_components(VedicMath)

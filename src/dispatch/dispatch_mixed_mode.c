@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include "vedicmath_dynamic.h"
 
 #ifdef _WIN32
     #include <windows.h>

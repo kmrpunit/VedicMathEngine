@@ -57,13 +57,13 @@ typedef enum {
 
 // Operation types for logging
 typedef enum {
-    VEDIC_OP_ADD = 0,
-    VEDIC_OP_SUBTRACT = 1,
-    VEDIC_OP_MULTIPLY = 2,
-    VEDIC_OP_DIVIDE = 3,
-    VEDIC_OP_SQUARE = 4,
-    VEDIC_OP_MODULO = 5,
-    VEDIC_OP_POWER = 6
+    VEDIC_OP_TYPE_ADD = VEDIC_OP_ADD,
+    VEDIC_OP_TYPE_SUBTRACT = VEDIC_OP_SUBTRACT,
+    VEDIC_OP_TYPE_MULTIPLY = VEDIC_OP_MULTIPLY,
+    VEDIC_OP_TYPE_DIVIDE = VEDIC_OP_DIVIDE,
+    VEDIC_OP_TYPE_SQUARE = VEDIC_OP_SQUARE,
+    VEDIC_OP_TYPE_MODULO = VEDIC_OP_MODULO,
+    VEDIC_OP_TYPE_POWER = VEDIC_OP_POWER
 } VedicOperationType;
 
 // Core configuration structure
@@ -233,6 +233,7 @@ const VedicOperationLog* vedic_core_get_log(size_t* count);
  * @return Result of multiplication
  */
 static VedicValue select_best_multiplication_method(VedicValue a, VedicValue b, const char** sutra_used);
+static VedicValue select_best_division_method(VedicValue dividend, VedicValue divisor, const char** sutra_used);
 
 // Convenience macros for common operations
 #define VEDIC_MULTIPLY(a, b) multiply_vedic_unified(vedic_from_int64(a), vedic_from_int64(b))

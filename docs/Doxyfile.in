@@ -1,0 +1,17 @@
+PROJECT_NAME           = "VedicMath-AI"
+PROJECT_NUMBER         = @VedicMathAI_VERSION@
+PROJECT_BRIEF          = "Adaptive Arithmetic Engine using Vedic Mathematics"
+
+OUTPUT_DIRECTORY       = @CMAKE_CURRENT_BINARY_DIR@/docs
+INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/include @CMAKE_CURRENT_SOURCE_DIR@/src
+
+FILE_PATTERNS          = *.h *.c *.md
+RECURSIVE              = YES
+EXTRACT_ALL            = YES
+
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+GENERATE_LATEX         = NO
+
+HAVE_DOT               = NO
+QUIET                  = YES
