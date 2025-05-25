@@ -173,6 +173,12 @@ add_executable(vedic_core_demo
 )
 target_link_libraries(vedic_core_demo vedicmath ${PLATFORM_LIBS})
 
+# NEW: Unified core demo
+add_executable(debug_test
+    tests/debug_test.c
+)
+target_link_libraries(debug_test vedicmath ${PLATFORM_LIBS})
+
 # NEW: System-aware dispatcher demo
 add_executable(dispatch_demo
     examples/dispatch_demo.c

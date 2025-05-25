@@ -153,10 +153,6 @@
              test_paravartya_yojayet();
              printf("\n");
              
-             printf("=== Vestanam Tests ===\n");
-             test_vestanam();
-             printf("\n");
-             
              printf("=== Ekanyunena Purvena Tests ===\n");
              test_ekanyunena_purvena();
              printf("\n");
@@ -183,6 +179,10 @@
              
              printf("=== Random Operation Tests ===\n");
              test_random_operations();
+             printf("\n");
+
+             printf("=== Vestanam Tests ===\n");
+             test_vestanam();
              printf("\n");
              
              break;

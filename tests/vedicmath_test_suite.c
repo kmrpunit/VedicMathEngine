@@ -30,7 +30,7 @@
      total_tests++;
      if (result) {
          passed_tests++;
-         printf(COLOR_GREEN "[v] PASS: %s\n", test_name);
+         printf(COLOR_GREEN "[✓] PASS: %s\n", test_name);
      } else {
          printf(COLOR_RED "[x] FAIL: %s\n", test_name);
      }
@@ -128,10 +128,11 @@
          {87, 113, 9831},
          
          // Near base 1000
-         {997, 998, 994906},
-         {995, 996, 990420},
-         {992, 989, 981088},
+         {997, 998, 995006},
+         {995, 996, 991020},
          {1003, 1005, 1008015},
+         {1004, 1006, 1010024},
+         {992, 989, 981088},
          {996, 1004, 999984},
          
          // Near base 10000
@@ -164,10 +165,10 @@
          {123, 456, 56088},
          {987, 654, 645498},
          {1234, 5678, 7006652},
-         {9876, 5432, 53644032},
+         {9876, 5432, 53646432},
          {12345, 67890, 838102050},
-         {123456, 789, 97426784},
-         {54321, 9876, 536491596}
+         {123456, 789, 97406784},
+         {54321, 9876, 536474196}
      };
      
      int num_cases = sizeof(test_cases) / sizeof(test_cases[0]);
@@ -289,8 +290,8 @@
          {9999, 9, 1111, 0},
          {8765, 23, 381, 2},
          {54321, 67, 810, 51},
-         {123456, 789, 156, 462},
-         {987654, 321, 3076, 138}
+         {123456, 789, 156, 372},
+         {987654, 321, 3076, 258}
      };
      
      int num_cases = sizeof(test_cases) / sizeof(test_cases[0]);
@@ -377,7 +378,7 @@
          {789, 999, 788211},
          {1234, 999, 1232766},
          {5678, 9999, 56774322},
-         {12345, 9999, 123337655}
+         {12345, 9999, 123437655}
      };
      
      int num_cases = sizeof(test_cases) / sizeof(test_cases[0]);
@@ -482,17 +483,17 @@
          double expected_x;
          double expected_y;
      } test_cases[] = {
-         {1, 1, 10, 1, -1, 4, 7, 3},     // x + y = 10, x - y = 4
-         {2, 3, 12, 7, 3, 27, 3, 2},     // 2x + 3y = 12, 7x + 3y = 27
-         {3, 5, 29, 2, -1, 1, 4, 3},     // 3x + 5y = 29, 2x - y = 1
-         {5, 2, 16, 3, 4, 24, 2, 3},     // 5x + 2y = 16, 3x + 4y = 24
-         {4, -5, 3, 2, 3, 13, 3, 1},     // 4x - 5y = 3, 2x + 3y = 13
-         {6, 7, 62, 5, -3, 7, 4, 5},     // 6x + 7y = 62, 5x - 3y = 7
-         {8, -9, 5, 4, 3, 19, 2, 1}      // 8x - 9y = 5, 4x + 3y = 19
+         {1, 1, 10, 1, -1, 4, 7, 3},                // x + y = 10, x - y = 4
+         {2, 3, 12, 7, 3, 27, 3, 2},                // 2x + 3y = 12, 7x + 3y = 27
+         {3, 5, 29, 2, -1, 1, 2.61538, 4.23077},    // 3x + 5y = 29, 2x - y = 1
+         {5, 2, 16, 3, 4, 24, 1.14286, 5.14286},    // 5x + 2y = 16, 3x + 4y = 24
+         {4, -5, 3, 2, 3, 13, 3.36364, 2.09091},    // 4x - 5y = 3, 2x + 3y = 13
+         {6, 7, 62, 5, -3, 7, 4.43396, 5.0566},     // 6x + 7y = 62, 5x - 3y = 7
+         {8, -9, 5, 4, 3, 19, 3.1, 2.2}             // 8x - 9y = 5, 4x + 3y = 19
      };
      
      int num_cases = sizeof(test_cases) / sizeof(test_cases[0]);
-     char test_name[100];
+     char test_name[200];
      
      for (int i = 0; i < num_cases; i++) {
          double x, y;
@@ -506,10 +507,11 @@
          int x_close = fabs(x - test_cases[i].expected_x) < epsilon;
          int y_close = fabs(y - test_cases[i].expected_y) < epsilon;
          
-         sprintf(test_name, "Sankalana-Vyavakalanabhyam: %dx + %dy = %d, %dx + %dy = %d -> x=%g, y=%g", 
+         sprintf(test_name, "Sankalana-Vyavakalanabhyam: %dx + %dy = %d, %dx + %dy = %d -> Expected: x=%g, y=%g; Calculated: x=%g, y=%g", 
                  test_cases[i].a1, test_cases[i].b1, test_cases[i].c1,
                  test_cases[i].a2, test_cases[i].b2, test_cases[i].c2,
-                 test_cases[i].expected_x, test_cases[i].expected_y);
+                 test_cases[i].expected_x, test_cases[i].expected_y,
+                 x, y);
                  
          print_test_result(test_name, result == 0 && x_close && y_close);
      }
@@ -551,7 +553,12 @@
          {100, 30, '%', 10},
          {1001, 10, '%', 1},
          {50, 8, '%', 2},
-         {-100, 30, '%', -10}
+         {-100, 30, '%', 20},
+         {-7, 3, '%', 2},
+         {7, 3, '%', 1},
+         {-15, 4, '%', 1},
+         {15, -4, '%', 3},   // Edge case: negative divisor
+         {-15, -4, '%', 1}   // Edge case: both negative
      };
      
      int num_cases = sizeof(test_cases) / sizeof(test_cases[0]);
@@ -580,8 +587,8 @@
                  result = 0;
          }
          
-         sprintf(test_name, "Operator: %ld %c %ld = %ld", 
-                 test_cases[i].a, test_cases[i].op, test_cases[i].b, test_cases[i].expected);
+         sprintf(test_name, "Operator: %ld %c %ld = %ld[Expected] %ld[Result]", 
+                 test_cases[i].a, test_cases[i].op, test_cases[i].b, test_cases[i].expected, result);
                  
          print_test_result(test_name, result == test_cases[i].expected);
      }

@@ -32,7 +32,7 @@
      total_tests++;
      if (result) {
          passed_tests++;
-         printf(COLOR_GREEN "[v] PASS: %s\n", test_name);
+         printf(COLOR_GREEN "[✓] PASS: %s\n", test_name);
      } else {
          printf(COLOR_RED "[x] FAIL: %s\n", test_name);
      }
