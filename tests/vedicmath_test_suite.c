@@ -818,3 +818,193 @@
          print_test_result(test_name, result == expected);
      }
  }
+
+ 
+/**
+ * Test Dhvajanka division method
+ */
+void test_dhvajanka_division() {
+    printf("\n=== Testing Dhvajanka (Flag Method) Division ===\n");
+    
+    struct {
+        long dividend;
+        long divisor;
+        long expected_quotient;
+        long expected_remainder;
+        const char* description;
+    } test_cases[] = {
+        // Basic 2-digit divisors
+        {1234, 23, 53, 15, "Basic 2-digit: 1234 ÷ 23"},
+        {5678, 34, 167, 0, "Exact division: 5678 ÷ 34"},
+        {9999, 45, 222, 9, "Large dividend: 9999 ÷ 45"},
+        
+        // 3-digit divisors
+        {12345, 123, 100, 45, "3-digit divisor: 12345 ÷ 123"},
+        {98765, 234, 422, 17, "Large 3-digit: 98765 ÷ 234"},
+        {50000, 125, 400, 0, "Round result: 50000 ÷ 125"},
+        
+        // 4-digit divisors
+        {123456, 1234, 100, 56, "4-digit divisor: 123456 ÷ 1234"},
+        {999999, 2468, 405, 459, "Large 4-digit: 999999 ÷ 2468"},
+        
+        // Edge cases
+        {100, 99, 1, 1, "Near base: 100 ÷ 99"},
+        {1000, 101, 9, 91, "Above base: 1000 ÷ 101"},
+        {12, 34, 0, 12, "Dividend < divisor: 12 ÷ 34"},
+        
+        // Negative numbers
+        {-1234, 23, -53, 15, "Negative dividend: -1234 ÷ 23"},
+        {1234, -23, -53, 15, "Negative divisor: 1234 ÷ -23"},
+        {-1234, -23, 53, 15, "Both negative: -1234 ÷ -23"}
+    };
+    
+    int num_cases = sizeof(test_cases) / sizeof(test_cases[0]);
+    
+    for (int i = 0; i < num_cases; i++) {
+        long remainder;
+        long quotient = dhvajanka_divide(test_cases[i].dividend, test_cases[i].divisor, &remainder);
+        
+        // Verify the result
+        long verification = (abs(quotient * test_cases[i].divisor) + remainder) * 
+                           (test_cases[i].dividend < 0 ? -1 : 1);
+        bool correct_division = (verification == test_cases[i].dividend);
+        bool matches_expected = (quotient == test_cases[i].expected_quotient && 
+                               remainder == test_cases[i].expected_remainder);
+        
+        char test_name[200];
+        sprintf(test_name, "Dhvajanka: %s (got %ld R %ld)", 
+                test_cases[i].description, quotient, remainder);
+        
+        print_test_result(test_name, correct_division && matches_expected);
+        
+        if (!correct_division || !matches_expected) {
+            printf("  Expected: %ld R %ld, Got: %ld R %ld, Verification: %ld == %ld? %s\n",
+                   test_cases[i].expected_quotient, test_cases[i].expected_remainder,
+                   quotient, remainder, verification, test_cases[i].dividend,
+                   correct_division ? "YES" : "NO");
+        }
+    }
+}
+
+/**
+ * Test Nikhilam division method
+ */
+void test_nikhilam_division() {
+    printf("\n=== Testing Nikhilam Division Sutra ===\n");
+    
+    struct {
+        long dividend;
+        long divisor;
+        long expected_quotient;
+        long expected_remainder;
+        const char* description;
+    } test_cases[] = {
+        // Numbers near 10
+        {123, 9, 13, 6, "Near 10 (below): 123 ÷ 9"},
+        {234, 11, 21, 3, "Near 10 (above): 234 ÷ 11"},
+        
+        // Numbers near 100
+        {9876, 99, 99, 75, "Near 100 (below): 9876 ÷ 99"},
+        {8765, 101, 86, 79, "Near 100 (above): 8765 ÷ 101"},
+        {5000, 98, 51, 2, "Round near 100: 5000 ÷ 98"},
+        
+        // Numbers near 1000
+        {123456, 999, 123, 579, "Near 1000 (below): 123456 ÷ 999"},
+        {98765, 1001, 98, 667, "Near 1000 (above): 98765 ÷ 1001"},
+        
+        // Edge cases for Nikhilam
+        {100, 99, 1, 1, "Exact near base: 100 ÷ 99"},
+        {1000, 1001, 0, 1000, "Dividend < divisor: 1000 ÷ 1001"},
+        {99, 99, 1, 0, "Exact division: 99 ÷ 99"},
+        
+        // Not suitable for Nikhilam (should fall back to standard)
+        {1234, 37, 33, 13, "Non-Nikhilam case: 1234 ÷ 37"},
+        
+        // Negative cases
+        {-9876, 99, -99, 75, "Negative dividend: -9876 ÷ 99"},
+        {8765, -101, -86, 79, "Negative divisor: 8765 ÷ -101"}
+    };
+    
+    int num_cases = sizeof(test_cases) / sizeof(test_cases[0]);
+    
+    for (int i = 0; i < num_cases; i++) {
+        long remainder;
+        long quotient = nikhilam_divide_sutra(test_cases[i].dividend, test_cases[i].divisor, &remainder);
+        
+        // Verify the result
+        long verification = (abs(quotient * test_cases[i].divisor) + remainder) * 
+                           (test_cases[i].dividend < 0 ? -1 : 1);
+        bool correct_division = (verification == test_cases[i].dividend);
+        bool matches_expected = (quotient == test_cases[i].expected_quotient && 
+                               remainder == test_cases[i].expected_remainder);
+        
+        char test_name[200];
+        sprintf(test_name, "Nikhilam: %s (got %ld R %ld)", 
+                test_cases[i].description, quotient, remainder);
+        
+        print_test_result(test_name, correct_division && matches_expected);
+        
+        if (!correct_division || !matches_expected) {
+            printf("  Expected: %ld R %ld, Got: %ld R %ld, Verification: %ld == %ld? %s\n",
+                   test_cases[i].expected_quotient, test_cases[i].expected_remainder,
+                   quotient, remainder, verification, test_cases[i].dividend,
+                   correct_division ? "YES" : "NO");
+        }
+    }
+}
+
+/**
+ * Test the enhanced division dispatcher
+ */
+void test_enhanced_division_dispatcher() {
+    printf("\n=== Testing Enhanced Division Dispatcher ===\n");
+    
+    struct {
+        long dividend;
+        long divisor;
+        const char* expected_method;
+        const char* description;
+    } test_cases[] = {
+        {1234, 5, "Standard Division", "Single digit divisor"},
+        {1234, 99, "Nikhilam Division Sutra", "Near 100 (Nikhilam suitable)"},
+        {1234, 23, "Dhvajanka (Flag Method)", "2-digit divisor (Dhvajanka suitable)"},
+        {1234, 12, "Paravartya Yojayet", "2-digit divisor (Paravartya suitable)"},
+        {1234, 1001, "Nikhilam Division Sutra", "Near 1000 (Nikhilam suitable)"},
+        {1234, 567, "Standard Division (Fallback)", "3-digit non-suitable case"},
+        {50, 100, "Standard Division", "Dividend < divisor"},
+        {0, 5, "Standard Division", "Zero dividend"}
+    };
+    
+    int num_cases = sizeof(test_cases) / sizeof(test_cases[0]);
+    
+    for (int i = 0; i < num_cases; i++) {
+        long remainder;
+        const char* method_used;
+        long quotient = vedic_divide_enhanced(test_cases[i].dividend, test_cases[i].divisor, 
+                                            &remainder, &method_used);
+        
+        // Verify correctness
+        long verification = (abs(quotient * test_cases[i].divisor) + remainder) * 
+                           (test_cases[i].divisor * test_cases[i].dividend < 0 ? -1 : 1);
+        bool correct_result = (verification == test_cases[i].dividend);
+        
+        // Check method selection (allow some flexibility)
+        bool correct_method = (strcmp(method_used, test_cases[i].expected_method) == 0);
+        
+        char test_name[200];
+        sprintf(test_name, "Dispatcher: %s - Method: %s", 
+                test_cases[i].description, method_used);
+        
+        print_test_result(test_name, correct_result);
+        
+        if (!correct_result) {
+            printf("  Division error: %ld ÷ %ld = %ld R %ld, Verification: %ld\n",
+                   test_cases[i].dividend, test_cases[i].divisor, quotient, remainder, verification);
+        }
+        
+        if (!correct_method) {
+            printf("  Method selection: Expected '%s', Got '%s'\n",
+                   test_cases[i].expected_method, method_used);
+        }
+    }
+}

@@ -144,12 +144,17 @@ target_include_directories(vedicmath
 
 target_link_libraries(vedicmath ${PLATFORM_LIBS})
 
+# Set properties for the library 
+add_executable(test_division_sutras
+    tests/test_division_sutras.c
+)
+target_link_libraries(test_division_sutras vedicmath ${PLATFORM_LIBS})
+
 # Test executables
 add_executable(vedicmath_test tests/vedicmath_test.c)
 target_link_libraries(vedicmath_test vedicmath ${PLATFORM_LIBS})
 
 add_executable(vedicmath_test_suite
-    tests/test_division_sutras.c
     tests/vedicmath_test_suite.c
     tests/vedicmath_test_main.c
 )
@@ -184,12 +189,6 @@ add_executable(debug_test
     tests/debug_test.c
 )
 target_link_libraries(debug_test vedicmath ${PLATFORM_LIBS})
-
-# NEW: Unified core demo
-add_executable(test_division_sutras
-    tests/test_division_sutras.c
-)
-target_link_libraries(test_division_sutras vedicmath ${PLATFORM_LIBS})
 
 # NEW: System-aware dispatcher demo
 add_executable(dispatch_demo
@@ -271,7 +270,8 @@ install(FILES ${VEDICMATH_HEADERS}
 
 # Install executables
 install(TARGETS 
-    vedicmath_test 
+    vedicmath_test
+    test_division_sutras
     vedicmath_test_suite 
     vedicmath_dynamic_test 
     vedicmath_benchmark
@@ -347,6 +347,10 @@ set_tests_properties(BenchmarkTests PROPERTIES TIMEOUT 60)
 
 add_test(NAME EnhancedBenchmarkTests COMMAND vedicmath_enhanced_benchmark 1000)
 set_tests_properties(EnhancedBenchmarkTests PROPERTIES TIMEOUT 120)
+
+# Add division sutras test
+add_test(NAME DivisionSutrasTests COMMAND division_sutras_test)
+set_tests_properties(DivisionSutrasTests PROPERTIES TIMEOUT 30)
 
 # Custom targets for development
 add_custom_target(run_tests

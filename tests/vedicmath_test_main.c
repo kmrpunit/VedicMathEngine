@@ -23,9 +23,10 @@ void test_sankalana_vyavakalanabhyam();
 void test_operators();
 void test_central_dispatcher();
 void test_random_operations();
+
 void test_dhvajanka_division();
 void test_nikhilam_division();
-void test_enhanced_division();
+void test_enhanced_division_dispatcher();
 
 int main(int argc, char *argv[])
 {
@@ -196,7 +197,7 @@ int main(int argc, char *argv[])
         printf("\n");
 
         printf("=== Enhanced Division Tests ===\n");
-        test_enhanced_division();
+        test_enhanced_division_dispatcher();
         printf("\n");
 
         printf("=== Vestanam Tests ===\n");
