@@ -82,6 +82,11 @@ set(VEDICMATH_CORE_SOURCES
     src/core/shunyam_saamyasamuccaye.c
     src/core/ekanyunena_purvena.c
     src/core/puranapuranabhyam.c
+
+    # Enhanced division sutras
+    src/core/dhvajanka_division.c
+    src/core/nikhilam_division.c
+    src/core/enhanced_division_dispatcher.c
     
     # Sub-sutras
     src/subsutra/vestanam.c
@@ -143,7 +148,8 @@ target_link_libraries(vedicmath ${PLATFORM_LIBS})
 add_executable(vedicmath_test tests/vedicmath_test.c)
 target_link_libraries(vedicmath_test vedicmath ${PLATFORM_LIBS})
 
-add_executable(vedicmath_test_suite 
+add_executable(vedicmath_test_suite
+    tests/test_division_sutras.c
     tests/vedicmath_test_suite.c
     tests/vedicmath_test_main.c
 )
@@ -178,6 +184,12 @@ add_executable(debug_test
     tests/debug_test.c
 )
 target_link_libraries(debug_test vedicmath ${PLATFORM_LIBS})
+
+# NEW: Unified core demo
+add_executable(test_division_sutras
+    tests/test_division_sutras.c
+)
+target_link_libraries(test_division_sutras vedicmath ${PLATFORM_LIBS})
 
 # NEW: System-aware dispatcher demo
 add_executable(dispatch_demo

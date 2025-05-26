@@ -95,6 +95,46 @@ VEDICMATH_API long combine_parts(long left, long right, int right_digits);
   * @return The quotient
   */
  long paravartya_divide(long dividend, long divisor, long *remainder);
+
+ /**
+ * Dhvajanka Division - "Flag Method"
+ * 
+ * Purpose: Division using flag digit approach for multi-digit divisors
+ * When to use: For divisors that can be expressed as 10^n ± small_number
+ * 
+ * @param dividend The number to be divided
+ * @param divisor The number to divide by
+ * @param remainder Pointer to store remainder (can be NULL if not needed)
+ * @return The quotient
+ */
+long dhvajanka_divide(long dividend, long divisor, long *remainder);
+
+/**
+ * Nikhilam Division Sutra - "All from 9 and the last from 10"
+ * 
+ * Purpose: Division when divisor is close to a power of 10
+ * When to use: For divisors within 20% of powers of 10 (9, 11, 99, 101, etc.)
+ * 
+ * @param dividend The number to be divided
+ * @param divisor The number to divide by (should be near a power of 10)
+ * @param remainder Pointer to store remainder (can be NULL if not needed)
+ * @return The quotient
+ */
+long nikhilam_divide_sutra(long dividend, long divisor, long *remainder);
+
+/**
+ * Enhanced division dispatcher - chooses best method automatically
+ * 
+ * Analyzes dividend and divisor to choose the most appropriate method from:
+ * 1. Standard division, 2. Paravartya Yojayet, 3. Dhvajanka, 4. Nikhilam Division
+ * 
+ * @param dividend The number to be divided
+ * @param divisor The number to divide by
+ * @param remainder Pointer to store remainder
+ * @param method_used Output parameter for method name (can be NULL)
+ * @return The quotient using the best available method
+ */
+long vedic_divide_enhanced(long dividend, long divisor, long *remainder, const char **method_used);
  
  /**
   * Yaavadunam - "Whatever the extent of its deficiency"

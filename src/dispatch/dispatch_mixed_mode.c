@@ -126,6 +126,36 @@ static const VedicSutraProfile VEDIC_SUTRA_PROFILES[] = {
         .memory_overhead_bytes = 0,
         .precision_factor = 1.0,
         .optimal_conditions = "Fallback for all cases"
+    },
+    {
+        .sutra_type = SUTRA_PARAVARTYA_YOJAYET,
+        .sutra_name = "Paravartya Yojayet",
+        .sanskrit_name = "परावर्त्य योजयेत्",
+        .complexity_factor = 0.6,
+        .expected_speedup = 2.2,
+        .memory_overhead_bytes = 128,
+        .precision_factor = 0.98,
+        .optimal_conditions = "2-digit divisors, systematic transpose method"
+    },    
+    {
+        .sutra_type = SUTRA_DHVAJANKA,
+        .sutra_name = "Dhvajanka",
+        .sanskrit_name = "ध्वजांक",
+        .complexity_factor = 0.8,
+        .expected_speedup = 1.8,
+        .memory_overhead_bytes = 192,
+        .precision_factor = 0.95,
+        .optimal_conditions = "Multi-digit divisors, flag digit optimization"
+    },
+    {
+        .sutra_type = SUTRA_NIKHILAM_DIVISION,
+        .sutra_name = "Nikhilam for Division",
+        .sanskrit_name = "निखिलं विभागे",
+        .complexity_factor = 0.7,
+        .expected_speedup = 2.5,
+        .memory_overhead_bytes = 160,
+        .precision_factor = 0.97,
+        .optimal_conditions = "Division with numbers near powers of 10"
     }
 };
 
@@ -937,6 +967,271 @@ VedicValue dispatch_square(VedicValue a) {
     return dispatch_multiply(a, a);
 }
 
+// ============================================================================
+// DIVISION PATTERN ANALYSIS FUNCTIONS
+// ============================================================================
+
+/**
+ * @brief Analyze Paravartya Yojayet pattern for division
+ * Following the same pattern as analyze_ekadhikena_pattern()
+ */
+static EnhancedPatternAnalysis analyze_paravartya_division_pattern(long dividend, long divisor) {
+    EnhancedPatternAnalysis analysis = {0};
+    
+    int divisor_digits = count_digits(abs(divisor));
+    
+    // Perfect case: 2-digit divisor with last digit not 0
+    if (divisor_digits == 2 && (abs(divisor) % 10) != 0) {
+        analysis.recommended_sutra = SUTRA_PARAVARTYA_YOJAYET;
+        analysis.confidence_score = 0.85;
+        analysis.performance_prediction = 2.2;
+        analysis.precision_estimate = 0.98;
+        analysis.memory_requirement = 128;
+        analysis.selection_reasoning = "Perfect Paravartya case: 2-digit divisor with transpose potential";
+        analysis.mathematical_basis = "Transpose and apply method, optimized for 2-digit divisors";
+        return analysis;
+    }
+    
+    // Good case: 2-digit divisor (modified approach)
+    if (divisor_digits == 2) {
+        analysis.recommended_sutra = SUTRA_PARAVARTYA_YOJAYET;
+        analysis.confidence_score = 0.65;
+        analysis.performance_prediction = 1.8;
+        analysis.precision_estimate = 0.95;
+        analysis.memory_requirement = 128;
+        analysis.selection_reasoning = "Modified Paravartya: 2-digit divisor";
+        analysis.mathematical_basis = "Adapted transpose method";
+        return analysis;
+    }
+    
+    analysis.confidence_score = 0.0;
+    return analysis;
+}
+
+/**
+ * @brief Analyze Dhvajanka pattern for division
+ */
+static EnhancedPatternAnalysis analyze_dhvajanka_division_pattern(long dividend, long divisor) {
+    EnhancedPatternAnalysis analysis = {0};
+    
+    int divisor_digits = count_digits(abs(divisor));
+    int dividend_digits = count_digits(abs(dividend));
+    
+    // Perfect case: 3+ digit divisor with sufficient dividend size
+    if (divisor_digits >= 3 && dividend_digits >= divisor_digits) {
+        analysis.recommended_sutra = SUTRA_DHVAJANKA;
+        analysis.confidence_score = 0.75;
+        analysis.performance_prediction = 1.8;
+        analysis.precision_estimate = 0.95;
+        analysis.memory_requirement = 192;
+        analysis.selection_reasoning = "Dhvajanka optimal: multi-digit divisor with flag potential";
+        analysis.mathematical_basis = "Flag digit method for systematic division estimation";
+        return analysis;
+    }
+    
+    // Good case: 3-digit divisor
+    if (divisor_digits == 3) {
+        analysis.recommended_sutra = SUTRA_DHVAJANKA;
+        analysis.confidence_score = 0.60;
+        analysis.performance_prediction = 1.5;
+        analysis.precision_estimate = 0.93;
+        analysis.memory_requirement = 192;
+        analysis.selection_reasoning = "Dhvajanka suitable: 3-digit divisor";
+        analysis.mathematical_basis = "Modified flag digit approach";
+        return analysis;
+    }
+    
+    analysis.confidence_score = 0.0;
+    return analysis;
+}
+
+/**
+ * @brief Analyze Nikhilam division pattern
+ */
+static EnhancedPatternAnalysis analyze_nikhilam_division_pattern(long dividend, long divisor) {
+    EnhancedPatternAnalysis analysis = {0};
+    
+    // Find nearest power of 10
+    long base = nearest_power_of_10(abs(divisor));
+    
+    // Calculate proximity to powers of 10
+    double proximity_factor = 0.0;
+    long distance = abs(abs(divisor) - base);
+    
+    if (distance <= base * 0.2) {
+        proximity_factor = 1.0 - ((double)distance / (base * 0.2));
+    }
+    
+    if (proximity_factor > 0.7) {
+        analysis.recommended_sutra = SUTRA_NIKHILAM_DIVISION;
+        analysis.confidence_score = proximity_factor;
+        analysis.performance_prediction = 1.8 + (proximity_factor * 0.7);
+        analysis.precision_estimate = 0.95 + (proximity_factor * 0.05);
+        analysis.memory_requirement = 160;
+        analysis.selection_reasoning = "Strong Nikhilam division: divisor close to power of 10";
+        analysis.mathematical_basis = "Complement-based division using Nikhilam principle";
+        return analysis;
+    }
+    
+    analysis.confidence_score = 0.0;
+    return analysis;
+}
+
+/**
+ * @brief Comprehensive division pattern analysis
+ * Following the same pattern as analyze_comprehensive_patterns()
+ */
+static EnhancedPatternAnalysis analyze_division_patterns(long dividend, long divisor) {
+    EnhancedPatternAnalysis candidates[3];
+    EnhancedPatternAnalysis best_analysis = {0};
+    
+    // Analyze all applicable division patterns
+    candidates[0] = analyze_paravartya_division_pattern(dividend, divisor);
+    candidates[1] = analyze_dhvajanka_division_pattern(dividend, divisor);
+    candidates[2] = analyze_nikhilam_division_pattern(dividend, divisor);
+    
+    // Find the best candidate
+    double best_score = 0.0;
+    for (int i = 0; i < 3; i++) {
+        double combined_score = candidates[i].confidence_score * 
+                               (1.0 + candidates[i].performance_prediction * 0.2);
+        
+        if (combined_score > best_score) {
+            best_score = combined_score;
+            best_analysis = candidates[i];
+        }
+    }
+    
+    // If no pattern found, default to standard division
+    if (best_analysis.confidence_score == 0.0) {
+        best_analysis.recommended_sutra = SUTRA_STANDARD;
+        best_analysis.confidence_score = 1.0;
+        best_analysis.performance_prediction = 1.0;
+        best_analysis.precision_estimate = 1.0;
+        best_analysis.memory_requirement = 0;
+        best_analysis.selection_reasoning = "No Vedic division pattern detected: using standard division";
+        best_analysis.mathematical_basis = "Standard division algorithm";
+    }
+    
+    return best_analysis;
+}
+
+// ============================================================================
+// ENHANCED DIVISION EXECUTION FUNCTION
+// ============================================================================
+
+/**
+ * @brief Execute selected Vedic division sutra with performance monitoring
+ * Following the same pattern as execute_vedic_sutra()
+ */
+static long execute_vedic_division_sutra(long dividend, long divisor, 
+                                        const EnhancedPatternAnalysis* analysis,
+                                        long* remainder) {
+    switch (analysis->recommended_sutra) {
+        case SUTRA_PARAVARTYA_YOJAYET:
+            return paravartya_divide(dividend, divisor, remainder);
+            
+        case SUTRA_DHVAJANKA:
+            // You'll need to implement dhvajanka_divide() following your paravartya pattern
+            return dhvajanka_divide(dividend, divisor, remainder);
+            
+        case SUTRA_NIKHILAM_DIVISION:
+            // You'll need to implement nikhilam_divide() for division
+            return nikhilam_divide_sutra(dividend, divisor, remainder);
+            
+        case SUTRA_STANDARD:
+        default:
+            if (remainder) *remainder = dividend % divisor;
+            return dividend / divisor;
+    }
+}
+
+// ============================================================================
+// ENHANCED DISPATCH_DIVIDE FUNCTION
+// ============================================================================
+
+/**
+ * @brief Enhanced adaptive division with comprehensive validation
+ * Following the exact same 4-step pattern as dispatch_multiply()
+ */
+VedicValue dispatch_divide_enhanced(VedicValue dividend, VedicValue divisor) {
+    // Convert to long for pattern analysis
+    long dividend_long = vedic_to_int64(dividend);
+    long divisor_long = vedic_to_int64(divisor);
+    
+    // Division by zero check
+    if (divisor_long == 0) {
+        printf("ERROR: Division by zero attempted\n");
+        return vedic_from_int64(0);
+    }
+    
+    // Update system monitoring
+    dispatch_update_system_resources();
+    
+    // STEP 1: Comprehensive pattern analysis
+    EnhancedPatternAnalysis pattern_analysis = analyze_division_patterns(dividend_long, divisor_long);
+    
+    // STEP 2: Apply system constraints (reuse existing function)
+    EnhancedPatternAnalysis final_analysis = apply_system_constraints(pattern_analysis, &system_monitor);
+    
+    // STEP 3: Performance validation through dual execution with high-res timing
+    long remainder = 0;
+    
+#ifdef _WIN32
+    LARGE_INTEGER frequency, vedic_start, vedic_end, standard_start, standard_end;
+    QueryPerformanceFrequency(&frequency);
+    
+    QueryPerformanceCounter(&vedic_start);
+    long vedic_quotient = execute_vedic_division_sutra(dividend_long, divisor_long, &final_analysis, &remainder);
+    QueryPerformanceCounter(&vedic_end);
+    
+    QueryPerformanceCounter(&standard_start);
+    long standard_quotient = dividend_long / divisor_long;
+    long standard_remainder = dividend_long % divisor_long;
+    QueryPerformanceCounter(&standard_end);
+    
+    double vedic_time_ms = ((double)(vedic_end.QuadPart - vedic_start.QuadPart)) / frequency.QuadPart * 1000.0;
+    double standard_time_ms = ((double)(standard_end.QuadPart - standard_start.QuadPart)) / frequency.QuadPart * 1000.0;
+    
+#else
+    struct timespec vedic_start, vedic_end, standard_start, standard_end;
+    
+    clock_gettime(CLOCK_MONOTONIC, &vedic_start);
+    long vedic_quotient = execute_vedic_division_sutra(dividend_long, divisor_long, &final_analysis, &remainder);
+    clock_gettime(CLOCK_MONOTONIC, &vedic_end);
+    
+    clock_gettime(CLOCK_MONOTONIC, &standard_start);
+    long standard_quotient = dividend_long / divisor_long;
+    long standard_remainder = dividend_long % divisor_long;
+    clock_gettime(CLOCK_MONOTONIC, &standard_end);
+    
+    double vedic_time_ms = ((vedic_end.tv_sec - vedic_start.tv_sec) * 1000.0) + 
+                          ((vedic_end.tv_nsec - vedic_start.tv_nsec) / 1000000.0);
+    double standard_time_ms = ((standard_end.tv_sec - standard_start.tv_sec) * 1000.0) + 
+                             ((standard_end.tv_nsec - standard_start.tv_nsec) / 1000000.0);
+#endif
+
+    // Safety checks for timing
+    if (standard_time_ms <= 0.0) standard_time_ms = 0.001;
+    if (vedic_time_ms <= 0.0) vedic_time_ms = 0.001;
+    
+    // Verify correctness
+    if (vedic_quotient != standard_quotient || remainder != standard_remainder) {
+        printf("WARNING: Division result mismatch! %ld / %ld: Vedic=(%ld,%ld), Standard=(%ld,%ld)\n", 
+               dividend_long, divisor_long, vedic_quotient, remainder, standard_quotient, standard_remainder);
+        
+        // Use standard result for safety
+        vedic_quotient = standard_quotient;
+        remainder = standard_remainder;
+    }
+    
+    // STEP 4: Record validation data for research (reuse existing function)
+    record_validation_data(dividend_long, divisor_long, vedic_quotient, 
+                          &final_analysis, vedic_time_ms, standard_time_ms);
+    
+    return vedic_from_int64(vedic_quotient);
+}
+
 /**
  * @brief Enhanced adaptive division with Vedic optimization potential
  * 
@@ -954,61 +1249,67 @@ VedicValue dispatch_square(VedicValue a) {
  * @return Division result with performance validation
  */
 VedicValue dispatch_divide(VedicValue dividend, VedicValue divisor) {
-    // Convert to long for analysis and validation
-    long dividend_long = vedic_to_int64(dividend);
-    long divisor_long = vedic_to_int64(divisor);
+    return dispatch_divide_enhanced(dividend, divisor);
+}
+
+// ============================================================================
+// DIVISION TEST PATTERN GENERATION
+// ============================================================================
+
+/**
+ * @brief Add division patterns to generate_comprehensive_validation_dataset()
+ * Add these categories to your existing pattern generation
+ */
+void generate_division_validation_patterns(size_t patterns_per_category) {
+    printf("Generating division validation patterns...\n");
     
-    // Division by zero check
-    if (divisor_long == 0) {
-        printf("ERROR: Division by zero attempted\n");
-        return vedic_from_int64(0);
-    }
-    
-    // Update system monitoring for adaptive behavior
-    dispatch_update_system_resources();
-    
-    // Performance timing for validation
-    clock_t vedic_start = clock();
-    
-    // Call dynamic division - returns VedicValue directly
-    VedicValue vedic_result = vedic_dynamic_divide(dividend, divisor);
-    
-    clock_t vedic_end = clock();
-    double vedic_time_ms = ((double)(vedic_end - vedic_start)) / CLOCKS_PER_SEC * 1000.0;
-    
-    // Standard division for validation
-    clock_t standard_start = clock();
-    long standard_result = dividend_long / divisor_long;
-    clock_t standard_end = clock();
-    double standard_time_ms = ((double)(standard_end - standard_start)) / CLOCKS_PER_SEC * 1000.0;
-    
-    // Validate correctness
-    long vedic_result_long = vedic_to_int64(vedic_result);
-    if (vedic_result_long != standard_result) {
-        printf("WARNING: Division result mismatch! %ld / %ld: Vedic=%ld, Standard=%ld\n", 
-               dividend_long, divisor_long, vedic_result_long, standard_result);
-        // Use standard result for safety
-        vedic_result = vedic_from_int64(standard_result);
-    }
-    
-    // Record performance data for research (if validation system is active)
-    if (validation_dataset) {
-        // Create analysis for division operations
-        EnhancedPatternAnalysis division_analysis = {
-            .recommended_sutra = SUTRA_STANDARD, // Currently no Vedic division sutras implemented
-            .confidence_score = (vedic_result_long == standard_result) ? 0.8 : 0.0,
-            .performance_prediction = 1.0,
-            .precision_estimate = 1.0,
-            .memory_requirement = 128,
-            .selection_reasoning = "Dynamic division with validation",
-            .mathematical_basis = "Standard division algorithm with error checking"
-        };
+    // Category 1: Paravartya Yojayet patterns (2-digit divisors)
+    printf("Generating Paravartya Yojayet division patterns...\n");
+    for (size_t i = 0; i < patterns_per_category; i++) {
+        long dividend = rand() % 10000 + 100;  // 100-10099
+        long divisor = rand() % 90 + 10;       // 10-99 (2-digit)
         
-        record_validation_data(dividend_long, divisor_long, vedic_result_long, 
-                              &division_analysis, vedic_time_ms, standard_time_ms);
+        VedicValue vd = vedic_from_int64(dividend);
+        VedicValue vs = vedic_from_int64(divisor);
+        VedicValue result = dispatch_divide(vd, vs);
+        (void)result;  // Suppress unused warning
     }
     
-    return vedic_result;
+    // Category 2: Dhvajanka patterns (3+ digit divisors)
+    printf("Generating Dhvajanka division patterns...\n");
+    for (size_t i = 0; i < patterns_per_category; i++) {
+        long dividend = rand() % 100000 + 1000;  // 1000-100999
+        long divisor = rand() % 900 + 100;       // 100-999 (3-digit)
+        
+        VedicValue vd = vedic_from_int64(dividend);
+        VedicValue vs = vedic_from_int64(divisor);
+        VedicValue result = dispatch_divide(vd, vs);
+        (void)result;
+    }
+    
+    // Category 3: Nikhilam division patterns (divisors near powers of 10)
+    printf("Generating Nikhilam division patterns...\n");
+    for (size_t i = 0; i < patterns_per_category; i++) {
+        // Choose a base power of 10
+        int base_power = rand() % 3 + 2;  // 10^2, 10^3, or 10^4
+        long base = 1;
+        for (int j = 0; j < base_power; j++) base *= 10;
+        
+        // Generate divisor within 20% of base
+        long range = base / 5;
+        long divisor = base + (rand() % (2 * range)) - range;
+        if (divisor <= 0) divisor = base - range/2;  // Ensure positive
+        
+        // Generate appropriate dividend
+        long dividend = divisor * (rand() % 100 + 1) + (rand() % divisor);
+        
+        VedicValue vd = vedic_from_int64(dividend);
+        VedicValue vs = vedic_from_int64(divisor);
+        VedicValue result = dispatch_divide(vd, vs);
+        (void)result;
+    }
+    
+    printf("Division validation patterns generated!\n");
 }
 
 // ============================================================================

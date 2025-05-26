@@ -15,6 +15,27 @@ The library implements the following sutras:
 5. **Yaavadunam** - "Whatever the extent of its deficiency" (squaring numbers near a base)
 6. **Antyayordasake** - "Last totaling 10" (multiplication where last digits sum to 10)
 
+### Enhanced Division Sutras
+
+The library now includes two additional powerful Vedic division methods:
+
+#### Dhvajanka (Flag Method)
+- **Purpose**: Efficient division using "flag" digit approach
+- **Best for**: Multi-digit divisors (2-4 digits)
+- **Example**: 1234 ÷ 23 uses flag digit 2 for systematic division
+
+#### Nikhilam Division Sutra
+- **Purpose**: Division using "All from 9, last from 10" principle  
+- **Best for**: Divisors near powers of 10 (9, 11, 99, 101, 999, 1001)
+- **Example**: 5000 ÷ 99 leverages proximity to 100 for faster calculation
+
+#### Enhanced Division Dispatcher
+Automatically selects the optimal division method:
+1. **Standard Division** - Simple cases
+2. **Paravartya Yojayet** - 2-digit divisors
+3. **Dhvajanka** - Multi-digit with clear patterns
+4. **Nikhilam Division** - Divisors near powers of 10
+
 ## Features
 
 - **Smart Method Selection**: Automatically chooses the most efficient Vedic technique based on input characteristics

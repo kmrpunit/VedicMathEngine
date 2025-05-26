@@ -42,8 +42,11 @@ typedef enum {
     SUTRA_NIKHILAM = 1,              // "All from 9 and the last from 10"
     SUTRA_ANTYAYORDASAKE = 2,        // "Last totaling 10"
     SUTRA_URDHVA_TIRYAGBHYAM = 3,    // "Vertically and crosswise"
-    SUTRA_STANDARD = 4,              // Standard arithmetic (fallback)
-    MAX_SUTRA_TYPES = 5
+    SUTRA_PARAVARTYA_YOJAYET = 4,    // "Transpose and apply" (division)
+    SUTRA_DHVAJANKA = 5,             // "Flag digit method" (division)
+    SUTRA_NIKHILAM_DIVISION = 6,     // "Nikhilam for division"    
+    SUTRA_STANDARD = 7,              // Standard arithmetic (fallback)
+    MAX_SUTRA_TYPES = 8              // Update count
 } VedicSutraType;
 
 /**
