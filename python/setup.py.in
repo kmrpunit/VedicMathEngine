@@ -1,0 +1,101 @@
+# python/setup.py.in - Template for Python package setup
+from setuptools import setup, Extension, find_packages
+import os
+import sys
+
+# Version from CMake
+__version__ = "@PROJECT_VERSION@"
+
+# Platform-specific library extension
+if sys.platform == "win32":
+    lib_extension = ".pyd"
+elif sys.platform == "darwin":
+    lib_extension = ".so"
+else:
+    lib_extension = ".so"
+
+# Define the extension module
+vedicmath_extension = Extension(
+    'vedicmath',
+    sources=[
+        # Core source files would be listed here
+        # For now, we'll use the pre-built shared library
+    ],
+    include_dirs=[
+        '@CMAKE_CURRENT_SOURCE_DIR@/include',
+    ],
+    libraries=['m'],  # Math library on Unix
+    library_dirs=[
+        '@CMAKE_BINARY_DIR@',
+        '@CMAKE_BINARY_DIR@/python',
+    ],
+    runtime_library_dirs=[
+        '@CMAKE_BINARY_DIR@',
+        '@CMAKE_BINARY_DIR@/python',
+    ],
+)
+
+setup(
+    name="vedicmath-ai",
+    version=__version__,
+    description="Adaptive Arithmetic Engine using Vedic Mathematics",
+    long_description="""
+    VedicMath-AI is an intelligent adaptive arithmetic engine that automatically
+    selects optimal Vedic Mathematics algorithms based on input patterns and
+    system constraints. It provides significant performance improvements over
+    traditional arithmetic methods.
+    """,
+    author="VedicMath-AI Team",
+    url="https://github.com/kmrpunit/VedicMathEngine",
+    packages=find_packages(),
+    
+    # Include the pre-built shared library
+    package_data={
+        'vedicmath': [
+            f'vedicmath{lib_extension}',
+            '*.py',
+        ],
+    },
+    
+    # Python version requirements
+    python_requires='>=3.6',
+    
+    # Dependencies
+    install_requires=[
+        'numpy>=1.18.0',
+    ],
+    
+    # Optional dependencies for enhanced features
+    extras_require={
+        'analysis': ['pandas>=1.0.0', 'matplotlib>=3.0.0'],
+        'benchmark': ['pytest-benchmark>=3.2.0'],
+    },
+    
+    # Classifiers
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Developers',
+        'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: C',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Topic :: Scientific/Engineering :: Mathematics',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+    ],
+    
+    # Entry points for command-line tools
+    entry_points={
+        'console_scripts': [
+            'vedicmath-benchmark=vedicmath.benchmark:main',
+            'vedicmath-demo=vedicmath.demo:main',
+        ],
+    },
+    
+    # Extension modules (if building from source)
+    # ext_modules=[vedicmath_extension],
+)
