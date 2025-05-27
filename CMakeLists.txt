@@ -109,6 +109,9 @@ set(VEDICMATH_CORE_SOURCES
     
     # NEW: System-aware dispatcher
     src/dispatch/dispatch_mixed_mode.c
+
+    # NEW: Unified adaptive dispatcher
+    src/unified/unified_adaptive_dispatcher.c
 )
 
 # Header files
@@ -122,6 +125,7 @@ set(VEDICMATH_HEADERS
     # NEW: Core headers
     include/vedic_core.h
     include/dispatch_mixed_mode.h
+    include/unified_adaptive_dispatcher.h    
 )
 
 # Create the main library
@@ -190,11 +194,30 @@ add_executable(debug_test
 )
 target_link_libraries(debug_test vedicmath ${PLATFORM_LIBS})
 
+# Unified Dispatcher Test
+add_executable(unified_test
+    tests/unified_dispatcher_test.c
+    src/unified/unified_adaptive_dispatcher.c
+)
+target_link_libraries(unified_test vedicmath ${PLATFORM_LIBS})
+target_include_directories(unified_test PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/unified
+)
+
+# Test target
+add_test(NAME UnifiedDispatcher COMMAND unified_test)
+
 # NEW: System-aware dispatcher demo
 add_executable(dispatch_demo
     examples/dispatch_demo.c
 )
 target_link_libraries(dispatch_demo vedicmath ${PLATFORM_LIBS})
+
+add_executable(matrix_vedic_operations
+    tests/matrix_vedic_operations.c
+)
+target_link_libraries(matrix_vedic_operations vedicmath ${PLATFORM_LIBS})
 
 # NEW: Dataset generation utility
 add_executable(dataset_generator
