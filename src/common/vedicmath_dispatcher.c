@@ -180,3 +180,121 @@
      if (remainder) *remainder = dividend % divisor;
      return quot;
  }
+
+ /**
+ * DISPATCHER DEBUG: Add logging to see what's actually happening
+ * 
+ * Add this to src/common/vedicmath_dispatcher.c to debug
+ * why Vedic methods aren't being selected
+ */
+
+// Modified vedic_multiply with debug logging
+long vedic_multiply_debug(long a, long b) {
+    printf("DEBUG: vedic_multiply(%ld, %ld)\n", a, b);
+    
+    // Handle trivial cases first
+    if (a == 0 || b == 0) {
+        printf("  -> Using direct (zero case)\n");
+        return 0;
+    }
+    if (a == 1) {
+        printf("  -> Using direct (unit case)\n");
+        return b;
+    }
+    if (b == 1) {
+        printf("  -> Using direct (unit case)\n");
+        return a;
+    }
+    
+    // Handle negative numbers
+    int sign = 1;
+    if (a < 0) { a = -a; sign = -sign; }
+    if (b < 0) { b = -b; sign = -sign; }
+    
+    // For very small numbers, just use direct multiplication
+    if (a < 10 && b < 10) {
+        printf("  -> Using direct (small numbers: %ld, %ld)\n", a, b);
+        return sign * (a * b);
+    }
+    
+    // Check if a number ends in 5 (Ekadhikena Purvena)
+    if ((a % 10 == 5) && (b % 10 == 5) && (a == b)) {
+        printf("  -> Using Ekadhikena Purvena (%ld ends in 5)\n", a);
+        return sign * ekadhikena_purvena(a);
+    }
+    
+    // Check if last digits sum to 10 and prefixes are same (Antyayordasake)
+    if (last_digits_sum_to_10(a, b) && same_prefix(a, b)) {
+        printf("  -> Using Antyayordasake (%ld, %ld: last digits sum to 10)\n", a, b);
+        return sign * antya_dasake_mul(a, b);
+    }
+    
+    // Check if numbers are close to powers of 10 (Nikhilam)
+    long base_a = nearest_power_of_10(a);
+    long base_b = nearest_power_of_10(b);
+    if (base_a == base_b && is_close_to_base(a, base_a) && is_close_to_base(b, base_b)) {
+        printf("  -> Using Nikhilam (%ld, %ld near base %ld)\n", a, b, base_a);
+        return sign * nikhilam_mul(a, b);
+    }
+    
+    // Check for large numbers (Urdhva-Tiryagbhyam)
+    int digits_a = count_digits(a);
+    int digits_b = count_digits(b);
+    if (digits_a > 2 || digits_b > 2) {
+        printf("  -> Using Urdhva-Tiryagbhyam (%d, %d digits)\n", digits_a, digits_b);
+        return sign * urdhva_mult(a, b);
+    }
+    
+    // Default to standard multiplication
+    printf("  -> Using standard multiplication (no pattern match)\n");
+    return sign * (a * b);
+}
+
+/**
+ * Test the dispatcher with known patterns
+ */
+void test_dispatcher_patterns() {
+    printf("\n=== DISPATCHER PATTERN TESTING ===\n");
+    
+    // Test Ekadhikena Purvena
+    printf("\nTesting Ekadhikena Purvena:\n");
+    vedic_multiply_debug(25, 25);  // Should use Ekadhikena
+    vedic_multiply_debug(35, 35);  // Should use Ekadhikena
+    vedic_multiply_debug(45, 45);  // Should use Ekadhikena
+    
+    // Test Antyayordasake
+    printf("\nTesting Antyayordasake:\n");
+    vedic_multiply_debug(47, 43);  // 4 prefix, 7+3=10
+    vedic_multiply_debug(52, 58);  // 5 prefix, 2+8=10
+    vedic_multiply_debug(91, 99);  // 9 prefix, 1+9=10
+    
+    // Test Nikhilam
+    printf("\nTesting Nikhilam:\n");
+    vedic_multiply_debug(98, 97);  // Near 100
+    vedic_multiply_debug(102, 103); // Near 100
+    vedic_multiply_debug(995, 998); // Near 1000
+    
+    // Test random numbers (should use standard)
+    printf("\nTesting Random Numbers:\n");
+    vedic_multiply_debug(123, 456); // Should use Urdhva or standard
+    vedic_multiply_debug(17, 29);   // Should use standard
+}
+
+/**
+ * CRITICAL: Check if is_close_to_base() is working correctly
+ */
+void debug_close_to_base() {
+    printf("\n=== DEBUGGING is_close_to_base() ===\n");
+    
+    // Test numbers near 100
+    long base = 100;
+    int test_numbers[] = {98, 97, 96, 95, 102, 103, 104, 105, 90, 110};
+    
+    for (int i = 0; i < 10; i++) {
+        long n = test_numbers[i];
+        bool is_close = is_close_to_base(n, base);
+        double ratio = (double)n / base;
+        printf("  %ld vs base %ld: is_close=%s, ratio=%.3f\n", 
+               n, base, is_close ? "YES" : "NO", ratio);
+    }
+}

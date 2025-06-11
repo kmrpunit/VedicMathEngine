@@ -110,10 +110,15 @@
   * Check if a number is "close" to a base
   * A number is considered close if it's within 10% of the base
   */
- bool is_close_to_base(long n, long base) {
-     double ratio = (double)n / base;
-     return (ratio >= 0.9 && ratio <= 1.1);
- }
+bool is_close_to_base(long n, long base) {
+    double ratio = (double)n / base;
+    
+    // OLD: Too restrictive (only 10% range)
+    // return (ratio >= 0.9 && ratio <= 1.1);
+    
+    // NEW: More generous (25% range for better Vedic detection)
+    return (ratio >= 0.75 && ratio <= 1.25);
+}
  
  /**
   * Combine two parts into a number with concatenation
